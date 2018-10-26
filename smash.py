@@ -28,7 +28,7 @@ class player1(object):
     char = pygame.image.load('data/char/standing.png')
 
     def __init__(self, x, y, w, h):
-        '''p1'''
+        '''player'''
         self.x = x;
         self.y = y;
         self.w = w; #width
@@ -98,22 +98,24 @@ class projectile(object):
     bullet_right = pygame.image.load('data/bullet/bulletR.png')
     bullet_left = pygame.image.load('data/bullet/bulletL.png')
 
-    def __init__(self,x,y,radius,color,facing):
+    def __init__(self,x,y,radius,color,facing,player):
         self.x = x;
         self.y = y;
         self.radius = radius;
         self.color = color;
         self.facing = facing;
         self.vel = 8 * facing;
-    def draw(self,window):
+        self.player = player
+    def draw(self,window,player):
         #pygame.draw.circle(window, self.color, (self.x, self.y), self.radius);
-        if p1.left:
+        if player.left:
             window.blit(self.bullet_left, (self.x-50, self.y-25))
         else:
             window.blit(self.bullet_right, (self.x, self.y-25))
+            
     def collision(self,what):
-        if bullet.y - bullet.radius < what.hitbox[1] + what.hitbox[3] and bullet.y + bullet.radius > what.hitbox[1]:
-                if bullet.x + bullet.radius > what.hitbox[0] and bullet.x - bullet.radius < what.hitbox[0] + what.hitbox[2]:
+        if self.y - self.radius < what.hitbox[1] + what.hitbox[3] and self.y + self.radius > what.hitbox[1]:
+                if self.x + self.radius > what.hitbox[0] and self.x - self.radius < what.hitbox[0] + what.hitbox[2]:
                     return True
         else:
             return False
@@ -126,7 +128,7 @@ class player2(object):
     char = pygame.image.load('data/char/standing.png')
 
     def __init__(self, x, y, w, h):
-        '''p2'''
+        '''enemy'''
         self.x = x;
         self.y = y;
         self.w = w; #width
@@ -216,70 +218,48 @@ class terrain(object):
             return False
 
 def jumpFunction(keys):
-    if not (p1.isJump):
+    if not (player.isJump):
         if keys[pygame.K_w]:
-            p1.isJump = True;
-            p1.right = False;
-            p1.left = False;
-            p1.runCount = 0;
+            player.isJump = True;
+            player.right = False;
+            player.left = False;
+            player.runCount = 0;
     else:
-        if p1.jumpCount >= -10:
+        if player.jumpCount >= -10:
             neg = 1;
-            if p1.jumpCount < 0:
+            if player.jumpCount < 0:
                 neg = -1
-            p1.y -= (p1.jumpCount ** 2) * 0.5 * neg;
-            p1.jumpCount -= 1;
+            player.y -= (player.jumpCount ** 2) * 0.5 * neg;
+            player.jumpCount -= 1;
 
         else:
-            p1.isJump = False;
-            p1.jumpCount = 10; 
+            player.isJump = False;
+            player.jumpCount = 10; 
 
 def jumpFunction2(keys):
-    if not (p2.isJump):
+    if not (enemy.isJump):
         if keys[pygame.K_UP]:
-            p2.isJump = True;
-            p2.right = False;
-            p2.left = False;
-            p2.runCount = 0;
+            enemy.isJump = True;
+            enemy.right = False;
+            enemy.left = False;
+            enemy.runCount = 0;
     else:
-        if p2.jumpCount >= -10:
+        if enemy.jumpCount >= -10:
             neg = 1;
-            if p2.jumpCount < 0:
+            if enemy.jumpCount < 0:
                 neg = -1
-            p2.y -= (p2.jumpCount ** 2) * 0.5 * neg;
-            p2.jumpCount -= 1;
+            enemy.y -= (enemy.jumpCount ** 2) * 0.5 * neg;
+            enemy.jumpCount -= 1;
 
         else:
-            p2.isJump = False;
-            p2.jumpCount = 10; 
+            enemy.isJump = False;
+            enemy.jumpCount = 10; 
 
-class messages(object):
-    #MESSAGES variables
-    message01 = pygame.image.load('data/messages/01.png')
-    def __init__(self,message,x,y,w,h):
-        self.message = message
-        self.x = x
-        self.y = y
-        self.w = w;
-        self.h = h;
-        self.text = ''
-
-    def draw(self,window):
-        if self.message == '01':
-            window.blit(self.message01,(self.x,self.y));
 
 def events(distance, what):
-    if distance == 200:
-        if what == 'blocks':
-            return True;
-    if distance == 1000:
-        if what == 'fps':
-            return True;
+
     if distance == 500:
-        if what == 'p2':
-            return True;
-    if distance == 0:
-        if what == 'space_use':
+        if what == 'enemy':
             return True;
     else:
         return False
@@ -290,65 +270,24 @@ def redrawGame():
     window.blit(background, (bgX2,0))
     p1.draw(window);
     p2.draw(window)
-    text = font.render("Score: %s"%score,1,(255,255,255))
-    window.blit(text, (370,10));
-    if distance < 1000:
-        counter = font.render(" %sm"%(distance),1,(255,255,255))
-    else:
-        counter = font.render(" %skm"%(distance/1000),1,(255,255,255))
-    window.blit(counter, (0,10));
-
     for b in blocks:
         b.draw(window);
-    for bullet in bullets:
-        bullet.draw(window);
-    #MESSAGES:
-    for n in notes:
-        n.draw(window)
+    for bullet in bullets1:
+        bullet.draw(window,p1);
+    for bullet in bullets2:
+        bullet.draw(window,p2)
     
     pygame.display.update();
     
+def GAME(player,blocks,bullets,enemy,isPlayer1):
+    '''gameplay'''
     
-
-#GAME variables
-distance_unit = 'm'
-distance = 0;
-font = pygame.font.SysFont('comicsans',30,True);
-bullets = [];
-fps = 30
-shootLoop = 0;
-score = 0 
-blocks = []
-
-p1 = player1(200,410,64,64);
-p2 = player2(screen_w-128,410,64,64)
-players = [p1,p2];
-
-use_space = []
-notes = []
-
-blocks.append(terrain(300,300,64,64))
-blocks.append(terrain(screen_w-200,100,64,64))
-
-notes.append(messages('01',100,50,64,64))
-
-game = True;
-space_event = True;
-while game:
-
-    if distance >= 1000:
-        distance_unit = 'km'
-    redrawGame();
-
-    #NOTES / MESSAGES:
-    
-    
+    shootLoop = 0;
     #BULLET COOLDOWN:
     if shootLoop > 0:
         shootLoop += 1;
     if shootLoop > 3:
         shootLoop = 0;
-
     #BULLETS:
     for bullet in bullets:
         for b in blocks:
@@ -356,11 +295,10 @@ while game:
                 hitSound.play();
                 bullets.pop(bullets.index(bullet));
 
-        #collision p2 bullet
-        if bullet.collision(p2) == True:
+        #collision enemy bullet
+        if bullet.collision(enemy) == True:
                 hitSound.play();
-                p2.hit();
-                score += 1;
+                enemy.hit();
                 bullets.pop(bullets.index(bullet));
 
         if bullet.x < screen_w and bullet.x > 0:
@@ -370,43 +308,16 @@ while game:
             
         for b in blocks:
             #COLLISION blocks player1
-            if b.collision(p1):
-                p1.collision(b.x,b.y,b.w,b.h)
+            if b.collision(player):
+                player.collision(b.x,b.y,b.w,b.h)
                 jumpFunction(keys)
                 jumpFunction2(keys)
 
-            #collision p1 bullet
-            if bullet.collision(p1) == True:
-                    hitSound.play();
-                    p1.hit();
-                    score += 1;
-                    bullets.pop(bullets.index(bullet));
-            
-
-        if bullet.x < screen_w and bullet.x > 0:
-            bullet.x += bullet.vel
-        else:
-            bullets.pop(bullets.index(bullet));
-                
-    for b in blocks:
-        #COLLISION blocks player2
-        if b.collision(p1):
-            p2.collision(b.x,b.y,b.w,b.h)
-            jumpFunction(keys)
-            jumpFunction2(keys)
-        #collision p2 bullet
-            if bullet.collision(p2) == True:
-                    hitSound.play();
-                    p2.hit();
-                    score += 1;
-                    bullets.pop(bullets.index(bullet));
-    #COLLISION player2 player1
-    #hitbox within x and y = collision
-    if p1.hitbox[1] < p2.hitbox[1] + p2.hitbox[3] and p1.hitbox[1] + p1.hitbox[3] > p2.hitbox[1]:
-        if p1.hitbox[0] + p1.hitbox[2] > p2.hitbox[0] and p1.hitbox[0] < p2.hitbox[0] + p2.hitbox[2]:
-            p1.hit();
-            p2.hit();
-            score -= 5;
+    #COLLISION player2 player1  #hitbox within x and y = collision
+    if player.hitbox[1] < enemy.hitbox[1] + enemy.hitbox[3] and player.hitbox[1] + player.hitbox[3] > enemy.hitbox[1]:
+        if player.hitbox[0] + player.hitbox[2] > enemy.hitbox[0] and player.hitbox[0] < enemy.hitbox[0] + enemy.hitbox[2]:
+            player.hit();
+            enemy.hit();
 
     #EVENTS quit
     for event in pygame.event.get():
@@ -416,110 +327,146 @@ while game:
             quit()
 
 
-    #EVENTS space
-    if events(distance,use_space) == True:
-        space_event = True;
-
     #KEYS press:
     keys = pygame.key.get_pressed();
-    #space
-    if space_event == True:
+    
+    if isPlayer1 == True:
+        #space
         if keys[pygame.K_SPACE] and shootLoop == 0:
-            if p1.left :
+            if player.left :
                 facing = -1
             else:
                 facing = 1
 
             if len(bullets) < 3 :
                 bulletSound.play();
-                bullets.append(projectile(round(p1.x + p1.w //2), round(p1.y+p1.h//2), 6, (0,94,255), facing))
+                bullets.append(projectile(round(player.x + player.w //2), round(player.y+player.h//2), 6, (0,94,255), facing,player))
             shootLoop = 1;
     
-    #left
-    if keys[pygame.K_a] and p1.x > p1.vel:
-        p1.left = True;
-        p1.x -= p1.vel;
-        p1.right = False;
-        p1.standing = False;
-    
-    #right
-    elif keys[pygame.K_d]:
-        p1.left = False;
-        if p1.move == True:
-            p1.x += p1.vel;
-        p1.right = True;
-        p1.standing = False;
-    else:
-        p1.standing = True;
-        p1.runCount = 0
-    
-    #up
-    if not (p1.isJump):
-        if keys[pygame.K_w]:
-            p1.isJump = True;
-            p1.right = False;
-            p1.left = False;
-            p1.runCount = 0;
-    else:
-        if p1.jumpCount >= -10:
-            neg = 1;
-            if p1.jumpCount < 0:
-                neg = -1
-            p1.y -= (p1.jumpCount ** 2) * 0.5 * neg;
-            p1.jumpCount -= 1;
-
+        #left
+        if keys[pygame.K_a] and player.x > player.vel:
+            player.left = True;
+            player.x -= player.vel;
+            player.right = False;
+            player.standing = False;
+        
+        #right
+        elif keys[pygame.K_d]:
+            player.left = False;
+            if player.move == True:
+                player.x += player.vel;
+            player.right = True;
+            player.standing = False;
         else:
-            p1.isJump = False;
-            p1.jumpCount = 10;
-
-    #down
-    if keys[pygame.K_s]:
-        if not (p1.isSlide):
-            p1.isSlide = True
-    
-    #left2
-    if keys[pygame.K_LEFT] :
-        p2.left = True;
-        p2.x -= p2.vel;
-        p2.right = False;
-        p2.standing = False;
-    
-    #right2
-    elif keys[pygame.K_RIGHT]:
-        p2.left = False;
-        if p2.move == True:
-            p2.x += p2.vel;
-        p2.right = True;
-        p2.standing = False;
-    else:
-        p2.standing = True;
-        p2.runCount = 0
-    
-    #up2
-    if not (p2.isJump):
-        if keys[pygame.K_UP]:
-            p2.isJump = True;
-            p2.right = False;
-            p2.left = False;
-            p2.runCount = 0;
-    else:
-        if p2.jumpCount >= -10:
-            neg = 1;
-            if p2.jumpCount < 0:
-                neg = -1
-            p2.y -= (p2.jumpCount ** 2) * 0.5 * neg;
-            p2.jumpCount -= 1;
-
+            player.standing = True;
+            player.runCount = 0
+        
+        #up
+        if not (player.isJump):
+            if keys[pygame.K_w]:
+                player.isJump = True;
+                player.right = False;
+                player.left = False;
+                player.runCount = 0;
         else:
-            p2.isJump = False;
-            p2.jumpCount = 10;
+            if player.jumpCount >= -10:
+                neg = 1;
+                if player.jumpCount < 0:
+                    neg = -1
+                player.y -= (player.jumpCount ** 2) * 0.5 * neg;
+                player.jumpCount -= 1;
 
-    #down2
-    if keys[pygame.K_DOWN]:
-        if not (p2.isSlide):
-            p2.isSlide = True
-            
-    clock.tick(fps);
+            else:
+                player.isJump = False;
+                player.jumpCount = 10;
+
+        #down
+        if keys[pygame.K_s]:
+            if not (player.isSlide):
+                player.isSlide = True
+    else:
+        #enter
+        if keys[pygame.K_KP_ENTER] and shootLoop == 0:
+            if player.left :
+                facing = -1
+            else:
+                facing = 1
+
+            if len(bullets) < 3 :
+                bulletSound.play();
+                bullets.append(projectile(round(player.x + player.w //2), round(player.y+player.h//2), 6, (0,94,255), facing,p2))
+            shootLoop = 1;
+    
+        #left
+        if keys[pygame.K_LEFT] and player.x > player.vel:
+            player.left = True;
+            player.x -= player.vel;
+            player.right = False;
+            player.standing = False;
+        
+        #right
+        elif keys[pygame.K_RIGHT]:
+            player.left = False;
+            if player.move == True:
+                player.x += player.vel;
+            player.right = True;
+            player.standing = False;
+        else:
+            player.standing = True;
+            player.runCount = 0
+        
+        #up
+        if not (player.isJump):
+            if keys[pygame.K_UP]:
+                player.isJump = True;
+                player.right = False;
+                player.left = False;
+                player.runCount = 0;
+        else:
+            if player.jumpCount >= -10:
+                neg = 1;
+                if player.jumpCount < 0:
+                    neg = -1
+                player.y -= (player.jumpCount ** 2) * 0.5 * neg;
+                player.jumpCount -= 1;
+
+            else:
+                player.isJump = False;
+                player.jumpCount = 10;
+
+        #down
+        if keys[pygame.K_DOWN]:
+            if not (player.isSlide):
+                player.isSlide = True
+    
 
     #END GAME:
 
+
+
+#GAME variables
+font = pygame.font.SysFont('comicsans',30,True);
+bullets1 = [];
+bullets2 = [];
+fps = 30
+shootLoop = 0;
+shootLoop2 = 0;
+blocks = []
+
+p1 = player1(200,410,64,64);
+p2 = player2(screen_w-128,410,64,64)
+
+use_space = []
+notes = []
+
+blocks.append(terrain(300,300,64,64))
+blocks.append(terrain(screen_w-200,100,64,64))
+
+game = True;
+space_event = True;
+
+while game:
+    redrawGame();
+    GAME(p1,blocks,bullets1,p2,True);
+    GAME(p2,blocks,bullets2,p1,False)
+    clock.tick(fps);
