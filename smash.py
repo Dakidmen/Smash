@@ -68,12 +68,15 @@ class player1(object):
         self.isJump = False;
         self.jumpCount = 10;
         self.runCount = 0;
+        self.x = self.x-128;
+        self.y = self.y+128;
         font1 = pygame.font.SysFont('comicsans', 100);
         text = font1.render('-5',1,(255,0,0));
         window.blit(text, (250-(text.get_width()/2), 200));
         pygame.display.update();
         i = 0;
         while i < 200:
+            pygame.time.delay(10);
             i += 1;
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -123,8 +126,8 @@ class projectile(object):
 class player2(object):
     #slide = [pygame.image.load(os.path.join('data', 'S1.png')),pygame.image.load(os.path.join('data', 'S2.png')),pygame.image.load(os.path.join('data', 'S2.png')),pygame.image.load(os.path.join('data', 'S2.png')), pygame.image.load(os.path.join('data', 'S2.png')),pygame.image.load(os.path.join('data', 'S2.png')), pygame.image.load(os.path.join('data', 'S2.png')), pygame.image.load(os.path.join('data', 'S2.png')), pygame.image.load(os.path.join('data', 'S3.png')), pygame.image.load(os.path.join('data', 'S4.png')), pygame.image.load(os.path.join('data', 'S5.png'))]
     jump = pygame.image.load('data/char/standing.png');
-    walkRight = [pygame.image.load('data/char/R1.png'),pygame.image.load('data/char/R2.png'),pygame.image.load('data/char/R3.png'),pygame.image.load('data/char/R4.png'),pygame.image.load('data/char/R5.png'),pygame.image.load('data/char/R6.png'),pygame.image.load('data/char/R7.png'),pygame.image.load('data/char/R8.png'),pygame.image.load('data/char/R9.png')];
-    walkLeft = [pygame.image.load('data/char/L1.png'),pygame.image.load('data/char/L2.png'),pygame.image.load('data/char/L3.png'),pygame.image.load('data/char/L4.png'),pygame.image.load('data/char/L5.png'),pygame.image.load('data/char/L6.png'),pygame.image.load('data/char/L7.png'),pygame.image.load('data/char/L8.png'),pygame.image.load('data/char/L9.png')]
+    walkRight = [pygame.image.load('data/char/P2/R1.png'),pygame.image.load('data/char/P2/R2.png'),pygame.image.load('data/char/P2/R3.png'),pygame.image.load('data/char/P2/R4.png'),pygame.image.load('data/char/P2/R5.png'),pygame.image.load('data/char/P2/R6.png'),pygame.image.load('data/char/P2/R7.png'),pygame.image.load('data/char/P2/R8.png'),pygame.image.load('data/char/P2/R9.png')];
+    walkLeft = [pygame.image.load('data/char/P2/L1.png'),pygame.image.load('data/char/P2/L2.png'),pygame.image.load('data/char/P2/L3.png'),pygame.image.load('data/char/P2/L4.png'),pygame.image.load('data/char/P2/L5.png'),pygame.image.load('data/char/P2/L6.png'),pygame.image.load('data/char/P2/L7.png'),pygame.image.load('data/char/P2/L8.png'),pygame.image.load('data/char/P2/L9.png')]
     char = pygame.image.load('data/char/standing.png')
 
     def __init__(self, x, y, w, h):
@@ -167,8 +170,8 @@ class player2(object):
     def hit(self):
         self.isJump = False;
         self.jumpCount = 10;
-        #self.x = 60;
-        #self.y = 410;
+        self.x = self.x-128;
+        self.y = self.y+128;
         self.runCount = 0;
         font1 = pygame.font.SysFont('comicsans', 100);
         text = font1.render('-5',1,(255,0,0));
@@ -316,8 +319,7 @@ def GAME(player,blocks,bullets,enemy,isPlayer1):
     #COLLISION player2 player1  #hitbox within x and y = collision
     if player.hitbox[1] < enemy.hitbox[1] + enemy.hitbox[3] and player.hitbox[1] + player.hitbox[3] > enemy.hitbox[1]:
         if player.hitbox[0] + player.hitbox[2] > enemy.hitbox[0] and player.hitbox[0] < enemy.hitbox[0] + enemy.hitbox[2]:
-            player.hit();
-            enemy.hit();
+            hitSound.play()
 
     #EVENTS quit
     for event in pygame.event.get():
