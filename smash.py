@@ -33,7 +33,7 @@ class player1(object):
         self.y = y;
         self.w = w; #width
         self.h = h; #height
-
+        self.health = 10;
         self.vel = 5;
         self.isJump = False; #jumping
         self.isSlide = False; #sliding
@@ -44,39 +44,45 @@ class player1(object):
         self.right = False;
         self.standing = True;
         self.move = True;
+        self.visible = True;
 
     def draw(self, window):
-        if self.runCount + 1 >= 27:
-            self.runCount = 0;
-        if not (self.standing):
-            if self.left:
-                window.blit(self.walkLeft[self.runCount//3], (self.x,self.y))
-                self.runCount += 1;
-            elif self.right:
-                window.blit(self.walkRight[self.runCount//3], (self.x,self.y))
-                self.runCount +=1
-        else:
-            if self.right:
-                window.blit(self.walkRight[0], (self.x,self.y));
+        if self.visible == True:
+            if self.runCount + 1 >= 27:
+                self.runCount = 0;
+            if not (self.standing):
+                if self.left:
+                    window.blit(self.walkLeft[self.runCount//3], (self.x,self.y))
+                    self.runCount += 1;
+                elif self.right:
+                    window.blit(self.walkRight[self.runCount//3], (self.x,self.y))
+                    self.runCount +=1
             else:
-                window.blit(self.walkLeft[0], (self.x,self.y));
+                if self.right:
+                    window.blit(self.walkRight[0], (self.x,self.y));
+                else:
+                    window.blit(self.walkLeft[0], (self.x,self.y));
 
-        #pygame.draw.rect(window,(255,0,0), self.hitbox,2);
-        self.hitbox = (self.x +17, self.y +11, 29, 52);
+            #pygame.draw.rect(window,(255,0,0), self.hitbox,2);
+            self.hitbox = (self.x +17, self.y +11, 29, 52);
+            pygame.draw.rect(window, (255,0,0), (self.hitbox[0], self.hitbox[1]-20, 50, 10));
+            pygame.draw.rect(window, (0,255,0), (self.hitbox[0], self.hitbox[1]-20, 50-((50/10)*(10-self.health)), 10));
 
     def hit(self):
+        if self.health > 0:
+            self.health -= 1;
+        if self.health == 0:
+            self.visible = False;
+            endGAME();
         self.isJump = False;
         self.jumpCount = 10;
         self.runCount = 0;
-        self.x = self.x-128;
-        self.y = self.y+128;
         font1 = pygame.font.SysFont('comicsans', 100);
         text = font1.render('-5',1,(255,0,0));
         window.blit(text, (250-(text.get_width()/2), 200));
         pygame.display.update();
         i = 0;
         while i < 200:
-            pygame.time.delay(10);
             i += 1;
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -136,7 +142,7 @@ class player2(object):
         self.y = y;
         self.w = w; #width
         self.h = h; #height
-
+        self.health = 10
         self.vel = 5;
         self.isJump = False; #jumping
         self.isSlide = False; #sliding
@@ -147,31 +153,38 @@ class player2(object):
         self.right = False;
         self.standing = True;
         self.move = True;
+        self.visible = True
 
     def draw(self, window):
-        if self.runCount + 1 >= 27:
-            self.runCount = 0;
-        if not (self.standing):
-            if self.left:
-                window.blit(self.walkLeft[self.runCount//3], (self.x,self.y))
-                self.runCount += 1;
-            elif self.right:
-                window.blit(self.walkRight[self.runCount//3], (self.x,self.y))
-                self.runCount +=1
-        else:
-            if self.right:
-                window.blit(self.walkRight[0], (self.x,self.y));
+        if self.visible == True:
+            if self.runCount + 1 >= 27:
+                self.runCount = 0;
+            if not (self.standing):
+                if self.left:
+                    window.blit(self.walkLeft[self.runCount//3], (self.x,self.y))
+                    self.runCount += 1;
+                elif self.right:
+                    window.blit(self.walkRight[self.runCount//3], (self.x,self.y))
+                    self.runCount +=1
             else:
-                window.blit(self.walkLeft[0], (self.x,self.y));
+                if self.right:
+                    window.blit(self.walkRight[0], (self.x,self.y));
+                else:
+                    window.blit(self.walkLeft[0], (self.x,self.y));
 
-        #pygame.draw.rect(window,(255,0,0), self.hitbox,2);
-        self.hitbox = (self.x +17, self.y +11, 29, 52);
+            #pygame.draw.rect(window,(255,0,0), self.hitbox,2);
+            self.hitbox = (self.x +17, self.y +11, 29, 52);
+            pygame.draw.rect(window, (255,0,0), (self.hitbox[0], self.hitbox[1]-20, 50, 10));
+            pygame.draw.rect(window, (0,255,0), (self.hitbox[0], self.hitbox[1]-20, 50-((50/10)*(10-self.health)), 10));
 
     def hit(self):
+        if self.health > 0:
+            self.health -= 1;
+        if self.health == 0:
+            self.visible = False;
+            endGAME();
         self.isJump = False;
         self.jumpCount = 10;
-        self.x = self.x-128;
-        self.y = self.y+128;
         self.runCount = 0;
         font1 = pygame.font.SysFont('comicsans', 100);
         text = font1.render('-5',1,(255,0,0));
@@ -442,9 +455,20 @@ def GAME(player,blocks,bullets,enemy,isPlayer1):
                 player.isSlide = True
     
 
-    #END GAME:
-
-
+def endGAME():
+    '''win condition fulfilled'''
+    font1 = pygame.font.SysFont('comicsans', 100);
+    text = font1.render('FATALITY',10,(255,255,0));
+    i = 0;
+    while i < 200:
+        window.blit(text, (250,150));
+        pygame.display.update();
+        pygame.time.delay(10);
+        i += 1;
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                i = 201;
+                pygame.quit()
 
 #GAME variables
 font = pygame.font.SysFont('comicsans',30,True);
